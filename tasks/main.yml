@@ -1,0 +1,23 @@
+---
+- name: Install apt prerequisites
+  become: yes
+  apt:
+    pkg:
+      - docker.io
+
+- name: Install pip3 prerequisites
+  become: yes
+  pip:
+    executable: /usr/bin/pip3
+    name:
+      - docker
+
+- set_fact:
+    current_user: "{{ ansible_user_id }}"
+
+- name: Ensure docker group membership
+  become: yes
+  user:
+    name: "{{ current_user }}"
+    groups: docker
+    append: yes
