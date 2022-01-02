@@ -12,12 +12,10 @@
     name:
       - docker
 
-- set_fact:
-    current_user: "{{ ansible_user_id }}"
-
 - name: Ensure docker group membership
   become: yes
+  when: docker_add_to_group|bool
   user:
-    name: "{{ current_user }}"
+    name: "{{ ansible_user_id }}"
     groups: docker
     append: yes
