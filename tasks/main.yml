@@ -1,12 +1,16 @@
 ---
 - name: Install apt prerequisites
   become: yes
+  tags:
+    - docker
   apt:
     pkg:
       - docker.io
 
 - name: Install pip3 prerequisites
   become: yes
+  tags:
+    - docker
   pip:
     executable: /usr/bin/pip3
     name:
@@ -15,7 +19,19 @@
 - name: Ensure docker group membership
   become: yes
   when: docker_add_to_group|bool
+  tags:
+    - docker
   user:
     name: "{{ ansible_user_id }}"
+    groups: docker
+    append: yes
+
+- name: Ensure additional docker group members
+  become: yes
+  loop: "{{ docker_additional_group_members }}"
+  tags:
+    - docker
+  user:
+    name: "{{ item }}"
     groups: docker
     append: yes
