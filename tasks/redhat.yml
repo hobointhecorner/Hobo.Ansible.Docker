@@ -2,6 +2,7 @@
 - name: Test if docker installed
   register: docker_stat
   changed_when: docker_stat.rc == 1
+  failed_when: no
   tags:
     - docker
   command: which docker
