@@ -1,11 +1,13 @@
 ---
-- name: Install apt prerequisites
-  become: yes
+- when: ansible_distribution|lower == 'ubuntu'
   tags:
     - docker
-  apt:
-    pkg:
-      - docker.io
+  include_tasks: ubuntu.yml
+
+- when: ansible_os_family|lower == 'redhat'
+  tags:
+    - docker
+  include_tasks: redhat.yml
 
 - name: Install pip3 prerequisites
   become: yes

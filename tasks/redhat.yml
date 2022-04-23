@@ -1,0 +1,16 @@
+---
+- name: Test if docker installed
+  register: docker_stat
+  changed_when: "{{ !docker_stat.stat.exists }}"
+  tags:
+    - docker
+  stat:
+    path: /usr/bin/docker
+
+- name: Install docker
+  when: docker_stat.changed
+  notify: Enable docker service
+  become: yes
+  tags:
+    - docker
+  command: yum install -y docker

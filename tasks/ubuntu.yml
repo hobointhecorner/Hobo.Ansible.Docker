@@ -1,0 +1,9 @@
+---
+- name: Install apt prerequisites
+  notify: Enable docker service
+  become: yes
+  tags:
+    - docker
+  apt:
+    pkg:
+      - docker.io
