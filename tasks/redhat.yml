@@ -1,11 +1,10 @@
 ---
 - name: Test if docker installed
   register: docker_stat
-  changed_when: "{{ !docker_stat.stat.exists }}"
+  changed_when: docker_stat.rc == 1
   tags:
     - docker
-  stat:
-    path: /usr/bin/docker
+  command: which docker
 
 - name: Install docker
   when: docker_stat.changed
