@@ -13,4 +13,4 @@
   become: yes
   tags:
     - docker
-  command: yum install -y docker
+  command: yum install -y docker docker-compose

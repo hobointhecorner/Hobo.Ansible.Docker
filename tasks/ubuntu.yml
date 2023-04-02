@@ -7,3 +7,4 @@
   apt:
     pkg:
       - docker.io
+      - docker-compose
