@@ -2,9 +2,7 @@
 - name: Ensure docker installed
   become: yes
   notify: Enable docker service
-  vars:
-    ansible_python_interpreter: /usr/bin/python
-  yum:
+  dnf:
     name:
       - docker
       - docker-compose
