@@ -1,7 +1,7 @@
 ---
 - name: Ensure docker prereqs installed
   become: yes
-  notify: Enable docker service
+  register: docker_service
   tags:
     - docker
   dnf:
@@ -10,7 +10,16 @@
       - git
     update_cache: yes
 
-- meta: flush_handlers
+- name: Enable docker service
+  when: docker_service.changed
+  become: yes
+  tags:
+    - docker
+  systemd:
+    name: docker.service
+    enabled: yes
+    daemon_reload: yes
+    state: restarted
 
 - name: Download docker-compose
   become: yes
