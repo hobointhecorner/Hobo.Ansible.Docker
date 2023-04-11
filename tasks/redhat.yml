@@ -3,10 +3,14 @@
   become: yes
   notify: Enable docker service
   dnf:
-    name:
-      - docker
-      - docker-compose
+    name: docker
     update_cache: yes
+
+- name: Ensure docker-compose installed
+  become: yes
+  pip:
+    name: docker-compose
+    executable: /usr/bin/pip3
 
 # - name: Test if docker installed
 #   register: docker_stat
