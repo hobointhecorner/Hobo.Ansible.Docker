@@ -10,6 +10,8 @@
       - git
     update_cache: yes
 
+- meta: flush_handlers
+
 - name: Download docker-compose
   become: yes
   register: docker_download
