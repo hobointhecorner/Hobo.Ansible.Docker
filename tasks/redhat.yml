@@ -5,9 +5,7 @@
   tags:
     - docker
   dnf:
-    name:
-      - containerd
-      - git
+    name: docker
     update_cache: yes
 
 - name: Enable docker service
