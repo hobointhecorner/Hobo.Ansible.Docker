@@ -10,7 +10,6 @@
   become: yes
   pip:
     name: docker-compose
-    executable: /usr/bin/pip3
 
 # - name: Test if docker installed
 #   register: docker_stat
