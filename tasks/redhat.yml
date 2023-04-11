@@ -1,16 +1,26 @@
 ---
-- name: Test if docker installed
-  register: docker_stat
-  changed_when: docker_stat.rc == 1
-  failed_when: no
-  tags:
-    - docker
-  command: which docker
-
-- name: Install docker
-  when: docker_stat.changed
-  notify: Enable docker service
+- name: Ensure docker installed
   become: yes
-  tags:
-    - docker
-  command: yum install -y docker docker-compose
+  notify: Enable docker service
+  vars:
+    ansible_python_interpreter: /usr/bin/python
+  yum:
+    name:
+      - docker
+      - docker-compose
+
+# - name: Test if docker installed
+#   register: docker_stat
+#   changed_when: docker_stat.rc == 1
+#   failed_when: no
+#   tags:
+#     - docker
+#   command: which docker
+
+# - name: Install docker
+#   when: docker_stat.changed
+#   notify: Enable docker service
+#   become: yes
+#   tags:
+#     - docker
+#   command: yum install -y docker docker-compose
