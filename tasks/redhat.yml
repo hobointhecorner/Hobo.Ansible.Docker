@@ -1,10 +1,4 @@
 ---
-- name: Ensure pip requirements
-  become: yes
-  pip:
-    name: python-dnf
-    executable: /usr/bin/pip3
-
 - name: Ensure docker installed
   become: yes
   notify: Enable docker service
