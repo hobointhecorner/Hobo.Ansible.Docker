@@ -1,6 +1,6 @@
 ---
 - name: Ensure pip requirements
-  decome: yes
+  become: yes
   pip:
     name: python-dnf
     executable: /usr/bin/pip3
