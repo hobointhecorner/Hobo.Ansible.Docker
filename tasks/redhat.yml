@@ -1,9 +1,11 @@
 ---
-- name: Ensure docker installed
+- name: Ensure dns prereqs installed
   become: yes
   notify: Enable docker service
   dnf:
-    name: docker
+    name:
+      - docker
+      - pip
     update_cache: yes
 
 - name: Ensure docker-compose installed
