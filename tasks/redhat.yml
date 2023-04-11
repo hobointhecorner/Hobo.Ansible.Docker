@@ -1,17 +1,27 @@
 ---
-- name: Ensure dns prereqs installed
+- name: Ensure docker prereqs installed
   become: yes
   notify: Enable docker service
+  tags:
+    - docker
   dnf:
     name:
-      - docker
-      - pip
+      - containerd
+      - git
     update_cache: yes
 
-- name: Ensure docker-compose installed
+- name: Download docker-compose
   become: yes
-  pip:
-    name: docker-compose
+  register: docker_download
+  tags:
+    - docker
+  get_url:
+    url: https://github.com/docker/compose/releases/latest/download/docker-compose-{{ ansible_system }}-{{ ansible_architecture }}
+    dest: /usr/libexec/docker/cli-plugins/docker-compose
+    force: yes
+    owner: root
+    group: root
+    mode: "755"
 
 # - name: Test if docker installed
 #   register: docker_stat
