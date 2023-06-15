@@ -1,16 +1,49 @@
 ---
-- name: Test if docker installed
-  register: docker_stat
-  changed_when: docker_stat.rc == 1
-  failed_when: no
+- name: Ensure docker prereqs installed
+  become: yes
+  register: docker_service
   tags:
     - docker
-  command: which docker
+  dnf:
+    name: docker
+    update_cache: yes
 
-- name: Install docker
-  when: docker_stat.changed
-  notify: Enable docker service
+- name: Enable docker service
+  when: docker_service.changed
   become: yes
   tags:
     - docker
-  command: yum install -y docker
+  systemd:
+    name: docker.service
+    enabled: yes
+    daemon_reload: yes
+    state: restarted
+
+- name: Download docker-compose
+  become: yes
+  register: docker_download
+  tags:
+    - docker
+  get_url:
+    url: https://github.com/docker/compose/releases/latest/download/docker-compose-{{ ansible_system }}-{{ ansible_architecture }}
+    dest: /usr/libexec/docker/cli-plugins/docker-compose
+    force: yes
+    owner: root
+    group: root
+    mode: "755"
+
+# - name: Test if docker installed
+#   register: docker_stat
+#   changed_when: docker_stat.rc == 1
+#   failed_when: no
+#   tags:
+#     - docker
+#   command: which docker
+
+# - name: Install docker
+#   when: docker_stat.changed
+#   notify: Enable docker service
+#   become: yes
+#   tags:
+#     - docker
+#   command: yum install -y docker docker-compose
