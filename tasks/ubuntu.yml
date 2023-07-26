@@ -1,13 +1,66 @@
 ---
-- name: Install apt prerequisites
+- name: Ensure apt prerequisites
   notify: Enable docker service
   become: yes
   tags:
     - docker
   apt:
     pkg:
+      - ca-certificates
+      - curl
+      - gnupg
+  register: apt_prereq_action
+  retries: 100
+  until: apt_prereq_action is success or ('Failed to lock apt for exclusive operation' not in apt_action.msg and '/var/lib/dpkg/lock' not in apt_action.msg)
+
+- name: Ensure inbox docker components removed
+  notify: Enable docker service
+  become: yes
+  tags:
+    - docker
+  apt:
+    state: absent
+    pkg:
       - docker.io
-      - docker-compose
+      - docker.compose
+      - docker-doc
+      - podman-docker
+      - containerd
+      - runc
+  register: apt_remove_action
+  retries: 100
+  until: apt_remove_action is success or ('Failed to lock apt for exclusive operation' not in apt_action.msg and '/var/lib/dpkg/lock' not in apt_action.msg)
+
+- name: Ensure gpg key
+  become: yes
+  tags:
+    - docker
+  get_url:
+    url: https://download.docker.com/linux/ubuntu/gpg
+    dest: /etc/apt/keyrings/docker.gpg
+    owner: root
+    group: root
+
+- name: Ensure repository
+  become: yes
+  tags:
+    - docker
+  apt_repository:
+    repo : deb [arch="amd64" signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable
+
+- name: Ensure docker installed
+  notify: Enable docker service
+  become: yes
+  tags:
+    - docker
+  apt:
+    pkg:
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+      - docker-buildx-plugin
+      - docker-compose-plugin
+  update_cache: yes
   register: apt_action
   retries: 100
   until: apt_action is success or ('Failed to lock apt for exclusive operation' not in apt_action.msg and '/var/lib/dpkg/lock' not in apt_action.msg)
