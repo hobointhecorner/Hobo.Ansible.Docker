@@ -33,15 +33,40 @@
   retries: 100
   until: apt_remove_action is success or ('Failed to lock apt for exclusive operation' not in apt_action.msg and '/var/lib/dpkg/lock' not in apt_action.msg)
 
-- name: Ensure gpg key
-  become: yes
+- name: Check for existing gpg key
   tags:
     - docker
-  get_url:
-    url: https://download.docker.com/linux/ubuntu/gpg
-    dest: /etc/apt/keyrings/docker.gpg
-    owner: root
-    group: root
+  stat:
+    path: /etc/apt/keyrings/docker.gpg
+  register: stat_gpg
+
+- when: stat_gpg.stat.exists is not defined or stat_gpg.stat.exists|bool == false
+  tags:
+    - docker
+  block:
+    - name: Download armored gpg key
+      become: yes
+      tags:
+        - docker
+      get_url:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        dest: /etc/apt/keyrings/docker.asc
+        owner: root
+        group: root
+
+    - name: Dearmor gpg key
+      become: yes
+      tags:
+        - docker
+      shell: gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+
+    - name: Remove armored gpg key
+      become: yes
+      tags:
+        - docker
+      file:
+        path: /etc/apt/keyrings/docker.asc
+        state: absent
 
 - name: Ensure repository
   become: yes
