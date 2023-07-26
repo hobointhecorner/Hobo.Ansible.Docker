@@ -1,4 +1,11 @@
 ---
+- name: Set ubuntu facts
+  tags:
+    - docker
+  set_fact:
+    docker_asc_path: /etc/apt/keyrings/docker.asc
+    docker_gpg_path: /etc/apt/keyrings/docker.gpg
+
 - name: Ensure apt prerequisites
   notify: Enable docker service
   become: yes
@@ -37,7 +44,7 @@
   tags:
     - docker
   stat:
-    path: /etc/apt/keyrings/docker.gpg
+    path: "{{ docker_gpg_path }}"
   register: stat_gpg
 
 - when: stat_gpg.stat.exists is not defined or stat_gpg.stat.exists|bool == false
@@ -50,7 +57,7 @@
         - docker
       get_url:
         url: https://download.docker.com/linux/ubuntu/gpg
-        dest: /etc/apt/keyrings/docker.asc
+        dest: "{{ docker_asc_path }}"
         owner: root
         group: root
 
@@ -58,14 +65,14 @@
       become: yes
       tags:
         - docker
-      shell: gpg --dearmor -o /etc/apt/keyrings/docker.gpg /etc/apt/keyrings/docker.asc
+      shell: gpg --dearmor -o {{ docker_gpg_path }} {{ docker_asc_path }}
 
     - name: Remove armored gpg key
       become: yes
       tags:
         - docker
       file:
-        path: /etc/apt/keyrings/docker.asc
+        path: "{{ docker_asc_path }}"
         state: absent
 
 - name: Ensure repository
@@ -73,7 +80,7 @@
   tags:
     - docker
   apt_repository:
-    repo : deb [arch="amd64" signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable
+    repo : deb [arch="amd64" signed-by={{ docker_gpg_path }}] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable
 
 - name: Ensure docker installed
   notify: Enable docker service
