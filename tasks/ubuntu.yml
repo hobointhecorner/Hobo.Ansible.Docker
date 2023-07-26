@@ -58,7 +58,7 @@
       become: yes
       tags:
         - docker
-      shell: gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+      shell: gpg --dearmor -o /etc/apt/keyrings/docker.gpg /etc/apt/keyrings/docker.asc
 
     - name: Remove armored gpg key
       become: yes
