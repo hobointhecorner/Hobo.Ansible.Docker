@@ -23,7 +23,7 @@
   tags:
     - docker
   copy:
-    source: files/docker-ce.repo
+    src: files/docker-ce.repo
     dest: /etc/yum.repos.d/docker-ce.repo
     owner: root
     group: root
