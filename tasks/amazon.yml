@@ -1,35 +1,5 @@
 ---
-- name: Ensure inbox prereqs removed
-  become: true
-  tags:
-    - docker
-  dnf:
-    state: absent
-    update_cache: true
-    name:
-      - docker
-      - docker-client
-      - docker-client-latest
-      - docker-common
-      - docker-latest
-      - docker-latest-logrotate
-      - docker-logrotate
-      - docker-selinux
-      - docker-engine-selinux
-      - docker-engine
-
-- name: Ensure repository
-  become: true
-  tags:
-    - docker
-  copy:
-    src: files/docker-ce.repo
-    dest: /etc/yum.repos.d/docker-ce.repo
-    owner: root
-    group: root
-    mode: "644"
-
-- name: Ensure docker installed
+- name: Ensure prereqs installed
   become: true
   register: docker_service
   tags:
@@ -37,11 +7,14 @@
   dnf:
     update_cache: true
     name:
-      - docker-ce
-      - docker-ce-cli
-      - containerd.io
-      - docker-buildx-plugin
-      - docker-compose-plugin
+      - docker
+      - python3-pip
+
+- name: Ensure pip packages installed
+  become: true
+  pip:
+    name:
+      - docker-compose
 
 - name: Enable docker service
   when: docker_service.changed
