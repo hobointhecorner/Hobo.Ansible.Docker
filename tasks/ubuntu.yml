@@ -8,11 +8,11 @@
 
 - name: Ensure apt prerequisites
   notify: Enable docker service
-  become: yes
+  become: true
   tags:
     - docker
   apt:
-    update_cache: yes
+    update_cache: true
     cache_valid_time: 900
     pkg:
       - ca-certificates
@@ -24,7 +24,7 @@
 
 - name: Ensure inbox docker components removed
   notify: Enable docker service
-  become: yes
+  become: true
   tags:
     - docker
   apt:
@@ -52,7 +52,7 @@
     - docker
   block:
     - name: Download armored gpg key
-      become: yes
+      become: true
       tags:
         - docker
       get_url:
@@ -62,13 +62,13 @@
         group: root
 
     - name: Dearmor gpg key
-      become: yes
+      become: true
       tags:
         - docker
       shell: gpg --dearmor -o {{ docker_gpg_path }} {{ docker_asc_path }}
 
     - name: Remove armored gpg key
-      become: yes
+      become: true
       tags:
         - docker
       file:
@@ -76,7 +76,7 @@
         state: absent
 
 - name: Ensure repository
-  become: yes
+  become: true
   tags:
     - docker
   apt_repository:
@@ -84,11 +84,11 @@
 
 - name: Ensure docker installed
   notify: Enable docker service
-  become: yes
+  become: true
   tags:
     - docker
   apt:
-    update_cache: yes
+    update_cache: true
     pkg:
       - docker-ce
       - docker-ce-cli

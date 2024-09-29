@@ -1,10 +1,25 @@
 ---
-- name: Ensure inbox prereqs removed
-  become: yes
+
+- name: Ensure repository
+  become: true
   tags:
     - docker
-  yum:
+  ini_file:
+    path: /etc/yum.repos.d/docker.repo
+    section: repo
+    option: baseurl
+    value: https://download.docker.com/linux/fedora/docker-ce.repo
+    owner: root
+    group: root
+    mode: "600"
+
+- name: Ensure inbox prereqs removed
+  become: true
+  tags:
+    - docker
+  dnf:
     state: absent
+    update_cache: true
     name:
       - docker
       - docker-client
@@ -17,40 +32,27 @@
       - docker-engine-selinux
       - docker-engine
 
-- name: Ensure repository
-  become: yes
-  tags:
-    - docker
-  ini_file:
-    path: /etc/yum.repos.d/docker.repo
-    section: repo
-    option: baseurl
-    value: https://download.docker.com/linux/fedora/docker-ce.repo
-    owner: root
-    group: root
-    mode: "600"
-
 - name: Ensure docker installed
-  become: yes
+  become: true
   register: docker_service
   tags:
     - docker
-  yum:
+  dnf:
+    update_cache: true
     name:
       - docker-ce
       - docker-ce-cli
       - containerd.io
       - docker-buildx-plugin
       - docker-compose-plugin
-    update_cache: yes
 
 - name: Enable docker service
   when: docker_service.changed
-  become: yes
+  become: true
   tags:
     - docker
   systemd:
     name: docker.service
-    enabled: yes
-    daemon_reload: yes
+    enabled: true
+    daemon_reload: true
     state: restarted
