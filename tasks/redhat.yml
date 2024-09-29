@@ -4,6 +4,7 @@
   tags:
     - docker
   dnf:
+    state: absent
     name:
       - docker
       - docker-client
