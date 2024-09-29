@@ -1,18 +1,4 @@
 ---
-
-- name: Ensure repository
-  become: true
-  tags:
-    - docker
-  ini_file:
-    path: /etc/yum.repos.d/docker.repo
-    section: repo
-    option: baseurl
-    value: https://download.docker.com/linux/fedora/docker-ce.repo
-    owner: root
-    group: root
-    mode: "600"
-
 - name: Ensure inbox prereqs removed
   become: true
   tags:
@@ -31,6 +17,17 @@
       - docker-selinux
       - docker-engine-selinux
       - docker-engine
+
+- name: Ensure repository
+  become: true
+  tags:
+    - docker
+  copy:
+    source: files/docker-ce.repo
+    dest: /etc/yum.repos.d/docker-ce.repo
+    owner: root
+    group: root
+    mode: "644"
 
 - name: Ensure docker installed
   become: true
