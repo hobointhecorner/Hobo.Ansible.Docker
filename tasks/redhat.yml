@@ -3,7 +3,7 @@
   become: yes
   tags:
     - docker
-  dnf:
+  yum:
     state: absent
     name:
       - docker
@@ -35,7 +35,7 @@
   register: docker_service
   tags:
     - docker
-  dnf:
+  yum:
     name:
       - docker-ce
       - docker-ce-cli
