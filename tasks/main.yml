@@ -9,15 +9,6 @@
     - docker
   include_tasks: amazon.yml
 
-- name: Install pip3 prerequisites
-  become: true
-  tags:
-    - docker
-  pip:
-    executable: /usr/bin/pip3
-    name:
-      - docker
-
 - name: Ensure docker group membership
   become: true
   when: docker_add_to_group|bool
