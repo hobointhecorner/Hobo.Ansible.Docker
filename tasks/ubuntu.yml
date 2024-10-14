@@ -95,15 +95,7 @@
       - containerd.io
       - docker-buildx-plugin
       - docker-compose-plugin
+      - python3-docker
   register: apt_action
   retries: 100
   until: apt_action is success or ('Failed to lock apt for exclusive operation' not in apt_action.msg and '/var/lib/dpkg/lock' not in apt_action.msg)
-
-- name: Install pip3 prerequisites
-  become: true
-  tags:
-    - docker
-  pip:
-    executable: /usr/bin/pip3
-    name:
-      - docker
