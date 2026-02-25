@@ -4,39 +4,31 @@
     - docker
   include_tasks: ubuntu.yml
 
-- when: ansible_os_family|lower == 'redhat'
+- when: ansible_distribution|lower == 'amazon'
   tags:
     - docker
-  include_tasks: redhat.yml
-
-- name: Install pip3 prerequisites
-  become: yes
-  tags:
-    - docker
-  pip:
-    executable: /usr/bin/pip3
-    name:
-      - docker
+  include_tasks: amazon.yml
 
 - name: Ensure docker group membership
-  become: yes
+  become: true
   when: docker_add_to_group|bool
   tags:
     - docker
   user:
     name: "{{ ansible_user_id }}"
     groups: docker
-    append: yes
+    append: true
 
 - name: Ensure additional docker group members
-  become: yes
+  become: true
   loop: "{{ docker_additional_group_members }}"
   tags:
     - docker
   user:
     name: "{{ item }}"
     groups: docker
-    append: yes
+    append: true
 
 - name: Flush handlers
   meta: flush_handlers
+  tags: ['always']

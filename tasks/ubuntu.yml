@@ -1,13 +1,101 @@
 ---
-- name: Install apt prerequisites
+- name: Set ubuntu facts
+  tags:
+    - docker
+  set_fact:
+    docker_asc_path: /etc/apt/keyrings/docker.asc
+    docker_gpg_path: /etc/apt/keyrings/docker.gpg
+
+- name: Ensure apt prerequisites
   notify: Enable docker service
-  become: yes
+  become: true
   tags:
     - docker
   apt:
+    update_cache: true
+    cache_valid_time: 900
+    pkg:
+      - ca-certificates
+      - curl
+      - gnupg
+  register: apt_prereq_action
+  retries: 100
+  until: apt_prereq_action is success or ('Failed to lock apt for exclusive operation' not in apt_action.msg and '/var/lib/dpkg/lock' not in apt_action.msg)
+
+- name: Ensure inbox docker components removed
+  notify: Enable docker service
+  become: true
+  tags:
+    - docker
+  apt:
+    state: absent
     pkg:
       - docker.io
-      - docker-compose
+      - docker.compose
+      - docker-doc
+      - podman-docker
+      - containerd
+      - runc
+  register: apt_remove_action
+  retries: 100
+  until: apt_remove_action is success or ('Failed to lock apt for exclusive operation' not in apt_action.msg and '/var/lib/dpkg/lock' not in apt_action.msg)
+
+- name: Check for existing gpg key
+  tags:
+    - docker
+  stat:
+    path: "{{ docker_gpg_path }}"
+  register: stat_gpg
+
+- when: stat_gpg.stat.exists is not defined or stat_gpg.stat.exists|bool == false
+  tags:
+    - docker
+  block:
+    - name: Download armored gpg key
+      become: true
+      tags:
+        - docker
+      get_url:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        dest: "{{ docker_asc_path }}"
+        owner: root
+        group: root
+
+    - name: Dearmor gpg key
+      become: true
+      tags:
+        - docker
+      shell: gpg --dearmor -o {{ docker_gpg_path }} {{ docker_asc_path }}
+
+    - name: Remove armored gpg key
+      become: true
+      tags:
+        - docker
+      file:
+        path: "{{ docker_asc_path }}"
+        state: absent
+
+- name: Ensure repository
+  become: true
+  tags:
+    - docker
+  apt_repository:
+    repo : deb [arch="amd64" signed-by={{ docker_gpg_path }}] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable
+
+- name: Ensure docker installed
+  notify: Enable docker service
+  become: true
+  tags:
+    - docker
+  apt:
+    update_cache: true
+    pkg:
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+      - docker-buildx-plugin
+      - docker-compose-plugin
+      - python3-docker
   register: apt_action
   retries: 100
   until: apt_action is success or ('Failed to lock apt for exclusive operation' not in apt_action.msg and '/var/lib/dpkg/lock' not in apt_action.msg)

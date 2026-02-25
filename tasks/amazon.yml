@@ -1,0 +1,32 @@
+---
+- name: Ensure docker installed
+  become: true
+  register: docker_service
+  tags:
+    - docker
+  dnf:
+    update_cache: true
+    name:
+      - docker
+
+- name: Ensure docker-compose installed
+  become: true
+  tags:
+    - docker
+  ansible.builtin.get_url:
+    url: https://github.com/docker/compose/releases/latest/download/docker-compose-Linux-x86_64
+    dest: /usr/local/bin/docker-compose
+    owner: root
+    group: root
+    mode: 755
+
+- name: Enable docker service
+  when: docker_service.changed
+  become: true
+  tags:
+    - docker
+  systemd:
+    name: docker.service
+    enabled: true
+    daemon_reload: true
+    state: restarted
